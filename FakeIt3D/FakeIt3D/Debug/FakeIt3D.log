@@ -1,0 +1,7 @@
+﻿  GameWindow.cpp
+c:\users\loppe\source\repos\fakeit3d\fakeit3d\gamewindow.cpp(18): warning C4302: 'type cast': truncation from 'LPSTR' to 'WORD'
+c:\users\loppe\source\repos\fakeit3d\fakeit3d\gamewindow.cpp(23): warning C4302: 'type cast': truncation from 'LPSTR' to 'WORD'
+  main.cpp
+  Generating Code...
+c:\users\loppe\source\repos\fakeit3d\fakeit3d\gamewindow.cpp(106): warning C4715: 'GameWindow::_connectDirect3D': not all control paths return a value
+  FakeIt3D.vcxproj -> C:\Users\Loppe\source\repos\FakeIt3D\Debug\FakeIt3D.exe
