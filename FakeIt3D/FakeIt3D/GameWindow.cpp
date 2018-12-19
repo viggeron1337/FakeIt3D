@@ -105,7 +105,7 @@ HRESULT GameWindow::_connectDirect3D()
 	}
 }
 
-LRESULT GameWindow::_WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+LRESULT GameWindow::WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	//Private _WndProc, the action happens here. 
 	switch (uMsg)
@@ -163,26 +163,33 @@ HRESULT GameWindow::_init()
 	return _connectDirect3D(); 
 }
 
+LRESULT CALLBACK procProxy(HWND handle, UINT message, WPARAM wParam, LPARAM lParam)
+{
+	GameWindow* pWindow = (GameWindow*)GetWindowLongPtrW(handle, GWLP_USERDATA);
+	if (pWindow->WndProc(handle,message, wParam, lParam))
+	{
+		return 0;
+	}
+
+	return DefWindowProcW(handle, message, wParam, lParam);
+}
+
 LRESULT GameWindow::StaticWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	//Create a pointer to a gameWindow, and embed it in the extra bytes in the window instance. 
 	//This pointer will be used to call a memberfunction variant of WndProc, which implicitly 
 	//will pass a this pointer as a parameter, hence we will reach all of the memeber variables in that function. 
 	
-	GameWindow* thisGameWndPtr = nullptr; 
+	if (uMsg  == WM_CREATE)
+	{
+		CREATESTRUCT* pCreate = (CREATESTRUCT*)lParam;
 
-	if (uMsg == WM_CREATE)
-	{
-		SetWindowLong(hwnd, GWLP_USERDATA, (LONG_PTR)thisGameWndPtr);
-		return DefWindowProc(hwnd, uMsg, wParam, lParam);
+		SetWindowLongPtrW(hwnd, GWLP_USERDATA, (LONG_PTR)pCreate->lpCreateParams);
+		SetWindowLongPtrW(hwnd, GWLP_WNDPROC, (LONG_PTR)procProxy);
+
+		return 0;
 	}
-	else
-	{
-		thisGameWndPtr = (GameWindow*)GetWindowLong(hwnd, GWLP_USERDATA);
-		if(!thisGameWndPtr) return DefWindowProc(hwnd, uMsg, wParam, lParam);
-	}
-		
-	return thisGameWndPtr->_WndProc(hwnd, uMsg, wParam, lParam);
+	return DefWindowProcW(hwnd, uMsg, wParam, lParam);
 }
 
 

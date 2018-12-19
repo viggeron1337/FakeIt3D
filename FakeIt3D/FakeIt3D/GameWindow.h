@@ -17,12 +17,6 @@ private:
 
 	int m_test; 
 
-	LRESULT CALLBACK _WndProc(
-		_In_ HWND   hwnd,
-		_In_ UINT   uMsg,
-		_In_ WPARAM wParam,
-		_In_ LPARAM lParam
-	);
 
 public:
 	GameWindow();
@@ -33,6 +27,12 @@ public:
 	void embedWndPtr(); 
 
 	static LRESULT CALLBACK StaticWndProc(
+		_In_ HWND   hwnd,
+		_In_ UINT   uMsg,
+		_In_ WPARAM wParam,
+		_In_ LPARAM lParam
+	);
+	LRESULT CALLBACK WndProc(
 		_In_ HWND   hwnd,
 		_In_ UINT   uMsg,
 		_In_ WPARAM wParam,
