@@ -50,8 +50,6 @@ int GameWindow::_createWindow()
 		NULL
 	);
 
-	this->embedWndPtr(); 
-
 	if (!m_wndHandler)
 	{
 		MessageBox(NULL,
@@ -165,7 +163,11 @@ HRESULT GameWindow::_init()
 
 LRESULT CALLBACK procProxy(HWND handle, UINT message, WPARAM wParam, LPARAM lParam)
 {
+	//Get the window pointer we stored in the extra bits of the window instance. 
 	GameWindow* pWindow = (GameWindow*)GetWindowLongPtrW(handle, GWLP_USERDATA);
+
+	//Use the collected pointer to call the member version of the WndProc. We can now use
+	//member variables in our WndProc function, convinient. 
 	if (pWindow->WndProc(handle,message, wParam, lParam))
 	{
 		return 0;
@@ -175,16 +177,18 @@ LRESULT CALLBACK procProxy(HWND handle, UINT message, WPARAM wParam, LPARAM lPar
 }
 
 LRESULT GameWindow::StaticWndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
-{
-	//Create a pointer to a gameWindow, and embed it in the extra bytes in the window instance. 
-	//This pointer will be used to call a memberfunction variant of WndProc, which implicitly 
-	//will pass a this pointer as a parameter, hence we will reach all of the memeber variables in that function. 
-	
+{	
 	if (uMsg  == WM_CREATE)
 	{
+
+		//When you receive the WM_CREATE message, the lParam parameter of each message is 
+		//a pointer to a CREATESTRUCT structure. The CREATESTRUCT structure, in turn, contains the pointer that you passed into CreateWindowEx.
 		CREATESTRUCT* pCreate = (CREATESTRUCT*)lParam;
 
+		//Store the data from the parameters into the free space in the instance of the window (A pointer to our window class). 
 		SetWindowLongPtrW(hwnd, GWLP_USERDATA, (LONG_PTR)pCreate->lpCreateParams);
+
+		//Here, the program is told that whenever our WndProc is called from now on, execute the procProxy function. 
 		SetWindowLongPtrW(hwnd, GWLP_WNDPROC, (LONG_PTR)procProxy);
 
 		return 0;
