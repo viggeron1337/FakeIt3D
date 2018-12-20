@@ -35,15 +35,18 @@ int GameWindow::_setWcex()
 
 int GameWindow::_createWindow()
 {
- 
-	static TCHAR szTitle[] = _T("FakeIt3D");
 
-	m_wndHandler = CreateWindow(
+	HRESULT hr;
+
+	//LPCTSTR szTitle = "FakeIt3D"; 
+
+	m_wndHandler = CreateWindowEx(
+		WS_EX_CLIENTEDGE,
 		m_wcex.lpszClassName,
-		szTitle,
+		"This is a Unicode string",
 		WS_OVERLAPPEDWINDOW,
 		CW_USEDEFAULT, CW_USEDEFAULT,
-		640,480,
+		640, 480,
 		NULL,
 		NULL,
 		m_wcex.hInstance,
