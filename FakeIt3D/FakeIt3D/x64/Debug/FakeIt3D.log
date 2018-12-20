@@ -1,28 +1,12 @@
-﻿  GameWindow.cpp
-c:\users\loppe\source\repos\fakeit3d\fakeit3d\gamewindow.cpp(18): warning C4302: 'type cast': truncation from 'LPSTR' to 'WORD'
-c:\users\loppe\source\repos\fakeit3d\fakeit3d\gamewindow.cpp(23): warning C4302: 'type cast': truncation from 'LPSTR' to 'WORD'
+﻿  compilation object save succeeded; see C:\Users\Victor Olsson\Desktop\Project\FakeIt3D\FakeIt3D\x64\Debug\Vertex.cso
+  ForwardRenderer.cpp
+  GameWindow.cpp
+c:\users\victor olsson\desktop\project\fakeit3d\fakeit3d\fakeit3d\gamewindow.cpp(18): warning C4302: 'type cast': truncation from 'LPSTR' to 'WORD'
+c:\users\victor olsson\desktop\project\fakeit3d\fakeit3d\fakeit3d\gamewindow.cpp(23): warning C4302: 'type cast': truncation from 'LPSTR' to 'WORD'
+c:\users\victor olsson\desktop\project\fakeit3d\fakeit3d\fakeit3d\gamewindow.cpp(154): warning C4311: 'type cast': pointer truncation from 'GameWindow *' to 'LONG'
+c:\users\victor olsson\desktop\project\fakeit3d\fakeit3d\fakeit3d\gamewindow.cpp(154): warning C4302: 'type cast': truncation from 'GameWindow *' to 'LONG'
   main.cpp
   Object.cpp
-c:\users\loppe\source\repos\fakeit3d\fakeit3d\object.h(10): error C2143: syntax error: missing ';' before '*'
-c:\users\loppe\source\repos\fakeit3d\fakeit3d\object.h(10): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-c:\users\loppe\source\repos\fakeit3d\fakeit3d\object.h(10): error C2238: unexpected token(s) preceding ';'
-c:\users\loppe\source\repos\fakeit3d\fakeit3d\object.h(33): warning C4200: nonstandard extension used: zero-sized array in struct/union
-  c:\users\loppe\source\repos\fakeit3d\fakeit3d\object.h(33): note: This member will be ignored by a defaulted constructor or copy/move assignment operator
-c:\users\loppe\source\repos\fakeit3d\fakeit3d\object.h(33): error C2997: 'Object::m_vertexBufferData': array bound cannot be deduced from a default member initializer
-  c:\users\loppe\source\repos\fakeit3d\fakeit3d\object.h(19): note: see declaration of 'Object::m_vertexBufferData'
-c:\users\loppe\source\repos\fakeit3d\fakeit3d\object.h(39): error C3646: 'Init': unknown override specifier
-c:\users\loppe\source\repos\fakeit3d\fakeit3d\object.h(39): error C2059: syntax error: '('
-c:\users\loppe\source\repos\fakeit3d\fakeit3d\object.h(39): error C2238: unexpected token(s) preceding ';'
-c:\users\loppe\source\repos\fakeit3d\fakeit3d\object.h(41): error C2143: syntax error: missing ';' before '*'
-c:\users\loppe\source\repos\fakeit3d\fakeit3d\object.h(41): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
-c:\users\loppe\source\repos\fakeit3d\fakeit3d\object.h(41): error C2238: unexpected token(s) preceding ';'
-c:\users\loppe\source\repos\fakeit3d\fakeit3d\object.cpp(13): error C2039: 'getBufferPtr': is not a member of 'Object'
-  c:\users\loppe\source\repos\fakeit3d\fakeit3d\object.h(6): note: see declaration of 'Object'
-c:\users\loppe\source\repos\fakeit3d\fakeit3d\object.cpp(15): error C2065: 'm_pVertexBuffer': undeclared identifier
-c:\users\loppe\source\repos\fakeit3d\fakeit3d\object.cpp(18): error C2039: 'Init': is not a member of 'Object'
-  c:\users\loppe\source\repos\fakeit3d\fakeit3d\object.h(6): note: see declaration of 'Object'
-c:\users\loppe\source\repos\fakeit3d\fakeit3d\object.cpp(24): error C2065: 'Vertex': undeclared identifier
-c:\users\loppe\source\repos\fakeit3d\fakeit3d\object.cpp(31): error C2065: 'm_vertexBufferData': undeclared identifier
-c:\users\loppe\source\repos\fakeit3d\fakeit3d\object.cpp(36): error C2065: 'm_pVertexBuffer': undeclared identifier
   Generating Code...
-c:\users\loppe\source\repos\fakeit3d\fakeit3d\gamewindow.cpp(104): warning C4715: 'GameWindow::_connectDirect3D': not all control paths return a value
+c:\users\victor olsson\desktop\project\fakeit3d\fakeit3d\fakeit3d\gamewindow.cpp(104): warning C4715: 'GameWindow::_connectDirect3D': not all control paths return a value
+  FakeIt3D.vcxproj -> C:\Users\Victor Olsson\Desktop\Project\FakeIt3D\FakeIt3D\x64\Debug\FakeIt3D.exe
