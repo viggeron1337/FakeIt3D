@@ -19,10 +19,10 @@ int GameWindow::_setWcex()
 	m_wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
 	m_wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
 	m_wcex.lpszMenuName = NULL;
-	m_wcex.lpszClassName = "GameWindow"; 
+	m_wcex.lpszClassName = L"GameWindow"; 
 	m_wcex.hIconSm = LoadIcon(m_wcex.hInstance, MAKEINTRESOURCE(IDI_APPLICATION));
 
-	if (!RegisterClassEx(&m_wcex))
+	if (!RegisterClassExW(&m_wcex))
 	{
 		MessageBox(NULL,
 			_T("Call to RegisterClassEx failed!"),
@@ -38,12 +38,11 @@ int GameWindow::_createWindow()
 
 	HRESULT hr;
 
-	//LPCTSTR szTitle = "FakeIt3D"; 
+	LPCWSTR szTitle = L"FakeIt3D"; 
 
-	m_wndHandler = CreateWindowEx(
-		WS_EX_CLIENTEDGE,
+	m_wndHandler = CreateWindowW(
 		m_wcex.lpszClassName,
-		"This is a Unicode string",
+		szTitle,
 		WS_OVERLAPPEDWINDOW,
 		CW_USEDEFAULT, CW_USEDEFAULT,
 		640, 480,
@@ -122,7 +121,7 @@ LRESULT GameWindow::WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		PostQuitMessage(0);
 		break;
 	default:
-		return DefWindowProc(hwnd, uMsg, wParam, lParam);
+		return DefWindowProcW(hwnd, uMsg, wParam, lParam);
 		break;
 	}
 
@@ -142,19 +141,13 @@ GameWindow::~GameWindow()
 int GameWindow::start()
 {
 	MSG msg;
-	while (GetMessage(&msg, NULL, 0, 0))
+	while (GetMessageW(&msg, NULL, 0, 0))
 	{
 		TranslateMessage(&msg);
-		DispatchMessage(&msg);
+		DispatchMessageW(&msg);
 	}
 
 	return (int)msg.wParam;
-}
-
-void GameWindow::embedWndPtr()
-{
-	//Embed pointer to this class in the windows extra space. 
-	SetWindowLongPtr(m_wndHandler,0,(LONG)this); 
 }
 
 HRESULT GameWindow::_init()

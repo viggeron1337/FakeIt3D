@@ -5,7 +5,7 @@
 class GameWindow
 {
 private:
-	WNDCLASSEX m_wcex; 
+	WNDCLASSEXW m_wcex; 
 	HWND m_wndHandler; 
 	HINSTANCE m_hInstance; 
 
@@ -23,8 +23,6 @@ public:
 	~GameWindow(); 
 
 	int start(); 
-
-	void embedWndPtr(); 
 
 	static LRESULT CALLBACK StaticWndProc(
 		_In_ HWND   hwnd,
