@@ -1,5 +1,46 @@
 #include "ForwardRenderer.h"
 #include "GameWindow.h"
+#include <chrono>
+#include <ctime>
+
+HRESULT ForwardRenderer::createSwapChain(HWND* wndHandler)
+{
+	HRESULT hr;
+
+	DXGI_SWAP_CHAIN_DESC sd;
+	ZeroMemory(&sd, sizeof(sd));
+	sd.BufferCount = 1;
+	sd.BufferDesc.Width = 640;
+	sd.BufferDesc.Height = 480;
+	sd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	sd.BufferDesc.RefreshRate.Numerator = 60;
+	sd.BufferDesc.RefreshRate.Denominator = 1;
+	sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
+	sd.OutputWindow = *wndHandler;
+	sd.SampleDesc.Count = 1;
+	sd.SampleDesc.Quality = 0;
+	sd.Windowed = TRUE;
+
+	D3D_FEATURE_LEVEL  FeatureLevelsRequested = D3D_FEATURE_LEVEL_11_0;
+	UINT               numLevelsRequested = 1;
+	D3D_FEATURE_LEVEL  FeatureLevelsSupported;
+
+	if (FAILED(hr = D3D11CreateDeviceAndSwapChain(NULL,
+		D3D_DRIVER_TYPE_HARDWARE,
+		NULL,
+		0,
+		&FeatureLevelsRequested,
+		1,
+		D3D11_SDK_VERSION,
+		&sd,
+		&DX::g_swapChain,
+		&DX::g_device,
+		&FeatureLevelsSupported,
+		&DX::g_deviceContext)))
+	{
+		return hr;
+	}
+}
 
 HRESULT ForwardRenderer::createDepthBufferStencil()
 {
@@ -32,6 +73,38 @@ HRESULT ForwardRenderer::createDepthBufferStencil()
 	return hr; 
 }
 
+HRESULT ForwardRenderer::createRenderTargetView()
+{
+	HRESULT  hr; 
+	ID3D11Texture2D* backBufferTex; 
+	
+	//Fills the Texture2D pointer with the back buffer
+	DX::g_swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&backBufferTex);
+	
+	//Create Resource out of backBuffer
+	hr = DX::g_device->CreateRenderTargetView(backBufferTex, nullptr, &m_pRenderTargetView); 
+	
+	//We do not need this anymore lol
+	backBufferTex->Release(); 
+
+	return hr; 
+}
+
+HRESULT ForwardRenderer::createDepthStencilState()
+{
+	return E_NOTIMPL;
+}
+
+HRESULT ForwardRenderer::createSamplerState()
+{
+	return E_NOTIMPL;
+}
+
+HRESULT ForwardRenderer::createViewPort()
+{
+	return E_NOTIMPL;
+}
+
 void ForwardRenderer::createInputDescription()
 {
 	D3D11_INPUT_ELEMENT_DESC layout[] =
@@ -46,7 +119,32 @@ void ForwardRenderer::createInputDescription()
 			  D3D11_INPUT_PER_VERTEX_DATA, 0 },
 	};
 
-	//DX::g_device->CreateInputLayout(layout, 4, VS->)
+	//DX::g_device->CreateInputLayout(layout, 4,)
+}
+
+HRESULT ForwardRenderer::init(HWND* wndHandler)
+{
+	HRESULT hr; 
+
+	//Initialize forward renderer 
+	hr = createSwapChain(wndHandler); 
+	createRenderTargetView(); 
+
+	return hr; 
+}
+
+void ForwardRenderer::beginFrame()
+{
+	//Set the background color (Clear color) 
+	float clearColor[] = { .25f, .5f, 1.0f, 1.0f };
+
+	DX::g_deviceContext->ClearRenderTargetView(m_pRenderTargetView, clearColor);
+}
+
+void ForwardRenderer::endFrame()
+{
+	//Swaping the buffer, presenting the back buffer. 
+	DX::g_swapChain->Present(1, 0); 
 }
 
 ForwardRenderer::ForwardRenderer()
@@ -56,3 +154,5 @@ ForwardRenderer::ForwardRenderer()
 ForwardRenderer::~ForwardRenderer()
 {
 }
+
+

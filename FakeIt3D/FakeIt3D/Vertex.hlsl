@@ -6,12 +6,27 @@ cbuffer CONSTANT_BUFFER : register(b0)
 struct VS_INPUT
 {
 	float4 pos : POSITION; 
-	float2 uv : UV; 
 	float4 color : COLOR; 
-	float4 normal : NORMAL; 
 };
 
-float4 main(VS_INPUT input) : SV_POSITION
+struct PS_INPUT
 {
-	return mul(input.pos, wvpMatrix); 
+	float4 pos : SV_POSITION; 
+	float4 color : COLOR; 
+};
+
+
+PS_INPUT main(VS_INPUT input)
+{
+	PS_INPUT output; 
+	
+	input.pos.w = 1.0f;
+
+	//Store needed values
+
+	//Transfer to wvp space 
+	output.pos = mul(input.pos, wvpMatrix); 
+	output.color = input.color; 
+
+	return output; 
 }

@@ -1,10 +1,8 @@
 
 struct VS_OUTPUT
 {
-	float4 wvpPos : Sv_POSITION; 
-	float2 uv : UV; 
+	float4 wvpPos : SV_POSITION; 
 	float4 color : COLOR; 
-	float4 normal : NORMAL; 
 };
 
 

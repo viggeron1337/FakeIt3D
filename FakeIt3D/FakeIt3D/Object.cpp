@@ -35,7 +35,5 @@ HRESULT Object::Init()
 	// Create the vertex buffer.
 	hr = DX::g_device->CreateBuffer(&bufferDesc, &InitData, &m_pVertexBuffer);
 
-
-
 	return hr; 
 }

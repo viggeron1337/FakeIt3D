@@ -69,40 +69,9 @@ int GameWindow::_createWindow()
 HRESULT GameWindow::_connectDirect3D()
 {
 	HRESULT hr; 
-
-	DXGI_SWAP_CHAIN_DESC sd;
-	ZeroMemory(&sd, sizeof(sd));
-	sd.BufferCount = 1;
-	sd.BufferDesc.Width = 640;
-	sd.BufferDesc.Height = 480;
-	sd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	sd.BufferDesc.RefreshRate.Numerator = 60;
-	sd.BufferDesc.RefreshRate.Denominator = 1;
-	sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-	sd.OutputWindow = m_wndHandler;
-	sd.SampleDesc.Count = 1;
-	sd.SampleDesc.Quality = 0;
-	sd.Windowed = TRUE;
-
-	D3D_FEATURE_LEVEL  FeatureLevelsRequested = D3D_FEATURE_LEVEL_11_0;
-	UINT               numLevelsRequested = 1;
-	D3D_FEATURE_LEVEL  FeatureLevelsSupported;
-
-	if (FAILED(hr = D3D11CreateDeviceAndSwapChain(NULL,
-		D3D_DRIVER_TYPE_HARDWARE,
-		NULL,
-		0,
-		&FeatureLevelsRequested,
-		1,
-		D3D11_SDK_VERSION,
-		&sd,
-		&DX::g_swapChain,
-		&DX::g_device,
-		&FeatureLevelsSupported,
-		&DX::g_deviceContext)))
-	{
-		return hr;
-	}
+	//Create forward renderer for window
+	hr = m_frwdRenderer.init(&m_wndHandler); 
+	return hr;
 }
 
 LRESULT GameWindow::WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
@@ -116,10 +85,11 @@ LRESULT GameWindow::WndProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		break;
 	case WM_DESTROY:
 		PostQuitMessage(0);
-		break;
+		break;  
 	case WM_KEYDOWN:
 		PostQuitMessage(0);
 		break;
+ 
 	default:
 		return DefWindowProcW(hwnd, uMsg, wParam, lParam);
 		break;
@@ -140,12 +110,29 @@ GameWindow::~GameWindow()
 
 int GameWindow::start()
 {
+	//Handle messages to the window 
 	MSG msg;
-	while (GetMessageW(&msg, NULL, 0, 0))
+	while (true)
 	{
-		TranslateMessage(&msg);
-		DispatchMessageW(&msg);
+		if (PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
+		{
+			TranslateMessage(&msg);
+			DispatchMessageW(&msg);
+
+			if (msg.message == WM_QUIT) break; 
+		}
+
+		//Main Loop//
+
+		//Update
+
+		//Render
+		m_frwdRenderer.beginFrame(); 
+		//Render everything
+		m_frwdRenderer.endFrame(); 
 	}
+
+
 
 	return (int)msg.wParam;
 }
