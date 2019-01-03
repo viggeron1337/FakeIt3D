@@ -17,32 +17,35 @@ private:
 	struct Vertex
 	{
 		DirectX::XMFLOAT4A Pos; 
-		DirectX::XMFLOAT2A UV; 
 		DirectX::XMFLOAT4A Color;
-		DirectX::XMFLOAT4A Normal; 
 	};
 
 	Vertex m_vertexBufferData[3] =
 	{
-		DirectX::XMFLOAT4A(0.0f,0.0f,0.0f,1.0f),
-		DirectX::XMFLOAT2A(0.0f,0.0f),
-		DirectX::XMFLOAT4A(1.0f,0.0f,0.0f,0.0f),
-		DirectX::XMFLOAT4A(0.0f,0.0f,-1.0f, 0.0f),
-		DirectX::XMFLOAT4A(0.0f,1.0f,0.0f, 1.0f),
-		DirectX::XMFLOAT2A(0.0f,1.0f),
-		DirectX::XMFLOAT4A(0.0f,1.0f,0.0f,0.0f),
-		DirectX::XMFLOAT4A(0.0f,0.0f,-1.0f,0.0f),
-		DirectX::XMFLOAT4A(1.0f,0.0f,0.0f,1.0f),
-		DirectX::XMFLOAT2A(1.0f,0.0f),
-		DirectX::XMFLOAT4A(0.0f,0.0f,1.0f,0.0f),
-		DirectX::XMFLOAT4A(0.0f,0.0f,-1.0f,0.0f),
+		//Defining vetices of a triangle
+		DirectX::XMFLOAT4A(-1.0f,-1.0f,0.0f, 0.0f),
+		DirectX::XMFLOAT4A(1.0, 0.0, 0.0, 1.0f), 
+		DirectX::XMFLOAT4A(0.0f,1.0f,0.0f, 0.0f),
+		DirectX::XMFLOAT4A(0.0, 1.0, 0.0, 1.0f),
+		DirectX::XMFLOAT4A(1.0f,-1.0f,0.0f, 0.0f),
+		DirectX::XMFLOAT4A(0.0, 0.0, 1.0, 1.0f),
 	};
+
+	HRESULT createMesh(); 
+	HRESULT createShaders(); 
+
+	//To be changed to shared shaders / input layouts for all objects of the same type, just to get things moving
+	ID3D11VertexShader* m_pVertexShader = nullptr; 
+	ID3D11PixelShader* m_pPixelShader = nullptr; 
+	ID3D11InputLayout* m_pInputLayout = nullptr; 
 
 public:
 	Object(); 
 	~Object(); 
 
-	HRESULT Init(); 
+	HRESULT Init();
+
+	void draw(); 
 
 	ID3D11Buffer* getBufferPtr(); 
 

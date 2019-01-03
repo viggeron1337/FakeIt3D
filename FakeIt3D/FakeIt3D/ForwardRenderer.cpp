@@ -5,13 +5,13 @@
 
 HRESULT ForwardRenderer::createSwapChain(HWND* wndHandler)
 {
+	//Note: Did not specify resolution, so the resolution for the window 
+	//held by wndHandler is used. 
 	HRESULT hr;
 
 	DXGI_SWAP_CHAIN_DESC sd;
 	ZeroMemory(&sd, sizeof(sd));
 	sd.BufferCount = 1;
-	sd.BufferDesc.Width = 640;
-	sd.BufferDesc.Height = 480;
 	sd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
 	sd.BufferDesc.RefreshRate.Numerator = 60;
 	sd.BufferDesc.RefreshRate.Denominator = 1;
@@ -46,29 +46,8 @@ HRESULT ForwardRenderer::createDepthBufferStencil()
 {
 	HRESULT hr; 
 
-	ID3D11Texture2D* pDepthStencil = NULL;
-	D3D11_TEXTURE2D_DESC descDepth;
-	descDepth.Width = 640;
-	descDepth.Height = 480;
-	descDepth.MipLevels = 1;
-	descDepth.ArraySize = 1;
-	descDepth.Format = DXGI_FORMAT_D32_FLOAT;
-	descDepth.SampleDesc.Count = 1;
-	descDepth.SampleDesc.Quality = 0;
-	descDepth.Usage = D3D11_USAGE_DEFAULT;
-	descDepth.BindFlags = D3D11_BIND_DEPTH_STENCIL;
-	descDepth.CPUAccessFlags = 0;
-	descDepth.MiscFlags = 0;
-	hr = DX::g_device->CreateTexture2D(&descDepth, NULL, &pDepthStencil);
-
-	D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc; 
-	depthStencilViewDesc.Format = DXGI_FORMAT_D32_FLOAT_S8X24_UINT;
-	depthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D; 
-	depthStencilViewDesc.Texture2D.MipSlice = 0; 
-
-	hr = DX::g_device->CreateDepthStencilView(pDepthStencil, &depthStencilViewDesc, &m_pDepthStencilView);
-
-	DX::g_deviceContext->OMSetRenderTargets(1, &m_pRenderTargetView, m_pDepthStencilView); 
+	//S_OK :)
+	hr = S_OK; 
 
 	return hr; 
 }
@@ -81,9 +60,12 @@ HRESULT ForwardRenderer::createRenderTargetView()
 	//Fills the Texture2D pointer with the back buffer
 	DX::g_swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (void**)&backBufferTex);
 	
-	//Create Resource out of backBuffer
-	hr = DX::g_device->CreateRenderTargetView(backBufferTex, nullptr, &m_pRenderTargetView); 
+	//Create View out of backBuffer Resource
+	hr = DX::g_device->CreateRenderTargetView(backBufferTex, nullptr, &m_pRenderTargetView);
 	
+	//Fill the back buffer description with neccesary information before releasing
+	backBufferTex->GetDesc(&m_backBufferDesc); 
+
 	//We do not need this anymore lol
 	backBufferTex->Release(); 
 
@@ -102,24 +84,12 @@ HRESULT ForwardRenderer::createSamplerState()
 
 HRESULT ForwardRenderer::createViewPort()
 {
-	return E_NOTIMPL;
-}
+	HRESULT hr;
 
-void ForwardRenderer::createInputDescription()
-{
-	D3D11_INPUT_ELEMENT_DESC layout[] =
-	{
-		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0,
-			  D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12,
-			  D3D11_INPUT_PER_VERTEX_DATA, 0 },
-		{ "COLOR", 0,  DXGI_FORMAT_R32G32B32A32_FLOAT,0, 20,  
-			D3D11_INPUT_PER_VERTEX_DATA,0},
-		{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 32, 
-			  D3D11_INPUT_PER_VERTEX_DATA, 0 },
-	};
+	//It's always OK :)
+	hr = S_OK; 
 
-	//DX::g_device->CreateInputLayout(layout, 4,)
+	return hr; 
 }
 
 HRESULT ForwardRenderer::init(HWND* wndHandler)
@@ -135,6 +105,16 @@ HRESULT ForwardRenderer::init(HWND* wndHandler)
 
 void ForwardRenderer::beginFrame()
 {
+	//Bind render target: OM stands for Output Merger
+	DX::g_deviceContext->OMSetRenderTargets(1, &m_pRenderTargetView, nullptr); 
+
+	//set viewPort, this function constructs one. 
+	//This is neccesay because the standard viewport is 0x0. 
+	auto viewPort = CD3D11_VIEWPORT(0.f, 0.f, (float)m_backBufferDesc.Width, (float)m_backBufferDesc.Height); 
+
+	//This is a setup for the razteriser, where the geometry is clipped against the viewport. 
+	DX::g_deviceContext->RSSetViewports(1, &viewPort); 
+
 	//Set the background color (Clear color) 
 	float clearColor[] = { .25f, .5f, 1.0f, 1.0f };
 

@@ -17,10 +17,11 @@ private:
 	HRESULT createSamplerState(); 
 	HRESULT createViewPort(); 
 
-	void createInputDescription();
-
 	//Render Target, a texture to render to. 
 	ID3D11RenderTargetView* m_pRenderTargetView = nullptr; 
+
+	//To be used to fill with data of the back buffer when neccesary. 
+	D3D11_TEXTURE2D_DESC m_backBufferDesc; 
 
 public:
 

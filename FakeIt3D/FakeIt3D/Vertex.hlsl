@@ -1,31 +1,25 @@
-cbuffer CONSTANT_BUFFER : register(b0)
+struct Input
 {
-	float wvpMatrix; 
-}
-
-struct VS_INPUT
-{
-	float4 pos : POSITION; 
+	float4 position : POSITION; 
 	float4 color : COLOR; 
 };
 
-struct PS_INPUT
+struct Output
 {
-	float4 pos : SV_POSITION; 
+	//When the POSITION tag is seen by the video card, it knows this is the final position,
+	//It will know how to project this to the screen  and clip it inside of the screen boundaires. 
+	float4 position : SV_POSITION; 
 	float4 color : COLOR; 
 };
 
-
-PS_INPUT main(VS_INPUT input)
+Output main(Input input)
 {
-	PS_INPUT output; 
+	Output output; 
+
+	//For correct calculations
+	input.position.w = 1; 
 	
-	input.pos.w = 1.0f;
-
-	//Store needed values
-
-	//Transfer to wvp space 
-	output.pos = mul(input.pos, wvpMatrix); 
+	output.position = input.position; 
 	output.color = input.color; 
 
 	return output; 

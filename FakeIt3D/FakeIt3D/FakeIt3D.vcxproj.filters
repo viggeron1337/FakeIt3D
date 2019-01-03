@@ -46,10 +46,8 @@
     <FxCompile Include="Vertex.hlsl">
       <Filter>Source Files</Filter>
     </FxCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="Pixel.hlsl">
+    <FxCompile Include="Pixel.hlsl">
       <Filter>Source Files</Filter>
-    </None>
+    </FxCompile>
   </ItemGroup>
 </Project>

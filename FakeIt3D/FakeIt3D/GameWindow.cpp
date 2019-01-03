@@ -1,5 +1,6 @@
 #include "GameWindow.h"
 #include <tchar.h>
+#include "Object.h"
 
 ID3D11Device* DX::g_device; 
 ID3D11DeviceContext* DX::g_deviceContext; 
@@ -45,7 +46,7 @@ int GameWindow::_createWindow()
 		szTitle,
 		WS_OVERLAPPEDWINDOW,
 		CW_USEDEFAULT, CW_USEDEFAULT,
-		640, 480,
+		800, 600,
 		NULL,
 		NULL,
 		m_wcex.hInstance,
@@ -110,6 +111,10 @@ GameWindow::~GameWindow()
 
 int GameWindow::start()
 {
+	//Test Object
+	Object triangle; 
+	triangle.Init(); 
+
 	//Handle messages to the window 
 	MSG msg;
 	while (true)
@@ -129,6 +134,8 @@ int GameWindow::start()
 		//Render
 		m_frwdRenderer.beginFrame(); 
 		//Render everything
+		triangle.draw(); 
+
 		m_frwdRenderer.endFrame(); 
 	}
 

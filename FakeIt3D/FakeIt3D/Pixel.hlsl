@@ -1,12 +1,10 @@
-
-struct VS_OUTPUT
+struct VSOutput
 {
-	float4 wvpPos : SV_POSITION; 
-	float4 color : COLOR; 
+	float4 position : SV_POSITION;
+	float4 color : COLOR;
 };
 
-
-float4 main(VS_OUTPUT input) : SV_TARGET
+float4 main(VSOutput input) : SV_TARGET
 {
-	return float4(color); 
+	return input.color; 
 }
