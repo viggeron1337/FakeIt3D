@@ -121,7 +121,7 @@ GameWindow::~GameWindow()
 
 int GameWindow::start()
 {
-	//Test Object
+	//Test Objects
 	Object triangle;
 	Object triangleZ; 
 	triangle.Init();
@@ -146,14 +146,18 @@ int GameWindow::start()
 
 		//Render
 		m_frwdRenderer.beginFrame(); 
+		
 		//Render everything
+
+		//Adding 2D objects to the queue
 		triangle.draw(); 
 		triangleZ.draw(); 
 
+		//Draw everything 2D
+		m_frwdRenderer.pass2D();
+
 		m_frwdRenderer.endFrame(); 
 	}
-
-
 
 	return (int)msg.wParam;
 }

@@ -1,11 +1,7 @@
 #include "GameWindow.h"
-#include "ForwardRenderer.h"
 int main()
 {
-	GameWindow gameWindow;
+	GameWindow gameWindow; 
 	gameWindow.start(); 
-	ForwardRenderer fRender; 
-
-
 	return 0;
 }

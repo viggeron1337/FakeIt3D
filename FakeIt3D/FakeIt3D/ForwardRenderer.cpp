@@ -2,8 +2,21 @@
 #include "GameWindow.h"
 #include <chrono>
 #include <ctime>
+#include <fstream>
+#include "ExternRenderQueue.h"
+#include "Extern.h"
 
-HRESULT ForwardRenderer::createSwapChain(HWND* wndHandler)
+//Initialize the extern queues
+std::vector<Object*> RenderQueue::g_Q2DObjects;
+
+//Initialze Shaders and Layout
+
+ID3D11VertexShader* DX::g_pVertexShader = nullptr;
+ID3D11PixelShader* DX::g_pPixelShader = nullptr;
+ID3D11InputLayout* DX::g_pInputLayout = nullptr;
+
+
+HRESULT ForwardRenderer::_createSwapChain(HWND* wndHandler)
 {
 	//Note: Did not specify resolution, so the resolution for the window 
 	//held by wndHandler is used. 
@@ -43,7 +56,7 @@ HRESULT ForwardRenderer::createSwapChain(HWND* wndHandler)
 }
 
 
-HRESULT ForwardRenderer::createRenderTargetView()
+HRESULT ForwardRenderer::_createRenderTargetView()
 {
 	HRESULT  hr; 
 	ID3D11Texture2D* backBufferTex; 
@@ -63,7 +76,7 @@ HRESULT ForwardRenderer::createRenderTargetView()
 	return hr; 
 }
 
-HRESULT ForwardRenderer::createZBuffer()
+HRESULT ForwardRenderer::_createZBuffer()
 {
 	HRESULT hr;  
 
@@ -136,14 +149,64 @@ HRESULT ForwardRenderer::createZBuffer()
 }
 
 
+void ForwardRenderer::_setup2DPass()
+{
+	//Set the shaders
+	DX::g_deviceContext->VSSetShader(DX::g_pVertexShader, nullptr, 0);
+	DX::g_deviceContext->PSSetShader(DX::g_pPixelShader, nullptr, 0);
+
+	//Set the layout
+	DX::g_deviceContext->IASetInputLayout(DX::g_pInputLayout); 
+}
+
+void ForwardRenderer::_setup3DPass()
+{
+}
+
+HRESULT ForwardRenderer::_initLayoutsAndShaders()
+{
+	HRESULT hr; 
+
+	//////////////////////////////////2D/////////////////////////////////////////////////////////////////////////////
+
+	//.cso is the sompiled versions of the shaders that are put in specified directory. 
+	//Makes sure to specify that the .cso files are binary and opens them. 
+	std::ifstream vsFile("Vertex.cso", std::ios::binary);
+	std::ifstream psFile("Pixel.cso", std::ios::binary);
+
+
+	//Creates an iterator that goes through the specified file (byte by byte as specified by the 'char' type;
+	//Then adds the data byte by byte into the vector. (This is pretty slow though)
+	std::vector<char> vsData = { std::istreambuf_iterator<char>(vsFile), std::istreambuf_iterator<char>() };
+	std::vector<char> psData = { std::istreambuf_iterator<char>(psFile), std::istreambuf_iterator<char>() };
+
+	hr = DX::g_device->CreateVertexShader(vsData.data(), vsData.size(), nullptr, &DX::g_pVertexShader);
+	DX::g_device->CreatePixelShader(psData.data(), psData.size(), nullptr, &DX::g_pPixelShader);
+
+	// Create input layout so that proper communication between buffers and shaders can be done. 
+	D3D11_INPUT_ELEMENT_DESC layout[] =
+	{
+		{"POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+		{"COLOR", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, D3D11_APPEND_ALIGNED_ELEMENT, D3D11_INPUT_PER_VERTEX_DATA, 0 }
+	};
+
+	DX::g_device->CreateInputLayout(layout, 2, vsData.data(), vsData.size(), &DX::g_pInputLayout);
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	return hr;
+}
+
 HRESULT ForwardRenderer::init(HWND* wndHandler)
 {
 	HRESULT hr; 
 
 	//Initialize forward renderer 
-	hr = createSwapChain(wndHandler); 
-	createRenderTargetView(); 
-	hr = createZBuffer(); 
+	hr = _createSwapChain(wndHandler); 
+	_createRenderTargetView(); 
+	hr = _createZBuffer(); 
+
+	_initLayoutsAndShaders();
 
 	return hr; 
 }
@@ -172,12 +235,38 @@ void ForwardRenderer::endFrame()
 	DX::g_swapChain->Present(1, 0); 
 }
 
+void ForwardRenderer::pass2D()
+{
+
+	_setup2DPass(); 
+	
+	//Set the stride for the 2D vertices. 
+	UINT stride = sizeof(Vertex); 
+	UINT offset = 0; 
+
+	//Set vertex buffer and draw.
+	for (int i = 0; i < RenderQueue::g_Q2DObjects.size(); i++)
+	{
+		ID3D11Buffer* vertexBuffer = RenderQueue::g_Q2DObjects[i]->getBufferPtr();
+		DX::g_deviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &stride ,&offset); 		
+		DX::g_deviceContext->Draw(3,0); 
+	}
+
+
+}
+
 ForwardRenderer::ForwardRenderer()
 {
 }
 
 ForwardRenderer::~ForwardRenderer()
 {
+	DX::g_pVertexShader->Release(); 
+	DX::g_pPixelShader->Release(); 
+	DX::g_pInputLayout->Release(); 
+	DX::g_swapChain->Release(); 
+	DX::g_device->Release(); 
+	DX::g_deviceContext->Release(); 
 }
 
 

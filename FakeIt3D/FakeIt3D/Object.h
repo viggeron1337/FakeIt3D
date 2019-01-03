@@ -2,7 +2,13 @@
 #include <DirectXMath.h>
 #include <d3d11.h>
 
-//This is just a temporary class for testing rendering. 
+
+//Vertex for the 2D Objects
+struct Vertex
+{
+	DirectX::XMFLOAT4A Pos; 
+	DirectX::XMFLOAT4A Color;
+};
 
 class Object
 {
@@ -14,31 +20,17 @@ private:
 	};
 
 	ID3D11Buffer* m_pVertexBuffer = nullptr;
-	struct Vertex
-	{
-		DirectX::XMFLOAT4A Pos; 
-		DirectX::XMFLOAT4A Color;
-	};
-
-
 	HRESULT createMesh(); 
-	HRESULT createShaders(); 
-
-	//To be changed to shared shaders / input layouts for all objects of the same type, just to get things moving
-	ID3D11VertexShader* m_pVertexShader = nullptr; 
-	ID3D11PixelShader* m_pPixelShader = nullptr; 
-	ID3D11InputLayout* m_pInputLayout = nullptr; 
 
 public:
 	Object(); 
 	~Object(); 
 
-	HRESULT Init();
 
+	HRESULT Init();
 	HRESULT tempInitZTriangle();
 
 	void draw(); 
 
 	ID3D11Buffer* getBufferPtr(); 
-
 };
