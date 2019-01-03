@@ -42,15 +42,6 @@ HRESULT ForwardRenderer::createSwapChain(HWND* wndHandler)
 	}
 }
 
-HRESULT ForwardRenderer::createDepthBufferStencil()
-{
-	HRESULT hr; 
-
-	//S_OK :)
-	hr = S_OK; 
-
-	return hr; 
-}
 
 HRESULT ForwardRenderer::createRenderTargetView()
 {
@@ -72,25 +63,78 @@ HRESULT ForwardRenderer::createRenderTargetView()
 	return hr; 
 }
 
-HRESULT ForwardRenderer::createDepthStencilState()
+HRESULT ForwardRenderer::createZBuffer()
 {
-	return E_NOTIMPL;
-}
+	HRESULT hr;  
 
-HRESULT ForwardRenderer::createSamplerState()
-{
-	return E_NOTIMPL;
-}
+	//Configure the texture to be used as a Z-Buffer
 
-HRESULT ForwardRenderer::createViewPort()
-{
-	HRESULT hr;
+	D3D11_TEXTURE2D_DESC zTexDesc; 
+	zTexDesc.Width = m_backBufferDesc.Width;
+	zTexDesc.Height = m_backBufferDesc.Height;
+	zTexDesc.MipLevels = 1; 
+	zTexDesc.ArraySize = 1; 
+	zTexDesc.Format = DXGI_FORMAT_D32_FLOAT; 
+	zTexDesc.SampleDesc.Count = 1; 
+	zTexDesc.SampleDesc.Quality = 0; 
+	zTexDesc.Usage = D3D11_USAGE_DEFAULT; 
+	zTexDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL; 
+	zTexDesc.CPUAccessFlags = 0;
+	zTexDesc.MiscFlags = 0; 
+	
+	hr = DX::g_device->CreateTexture2D(&zTexDesc, NULL, &m_pZbufferTex);
 
-	//It's always OK :)
-	hr = S_OK; 
+	//Configure the settings for how the OM is to handle Z-checks. 
 
+	D3D11_DEPTH_STENCIL_DESC zStateDesc; 
+
+	// Depth test parameters
+	zStateDesc.DepthEnable = true;
+	zStateDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+	zStateDesc.DepthFunc = D3D11_COMPARISON_LESS;
+
+	// Stencil test parameters
+	zStateDesc.StencilEnable = true;
+	zStateDesc.StencilReadMask = 0xFF;
+	zStateDesc.StencilWriteMask = 0xFF;
+
+	// Stencil operations if pixel is front-facing
+	zStateDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	zStateDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
+	zStateDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+	zStateDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
+	// Stencil operations if pixel is back-facing
+	zStateDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	zStateDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
+	zStateDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+	zStateDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
+	// Create depth stencil state
+	hr = DX::g_device->CreateDepthStencilState(&zStateDesc, &m_pZbufferState); 
+
+	//Now bind the depth-stencil state to the OM stage. 
+	if (hr == S_OK)
+	{
+		DX::g_deviceContext->OMSetDepthStencilState(m_pZbufferState, 1); 
+	}
+
+	//Make the resource (Zbuffer texture) into a view and bind it as a rendertarget for the OM to use. 
+	D3D11_DEPTH_STENCIL_VIEW_DESC descDSV;
+	descDSV.Format = zTexDesc.Format;
+	descDSV.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+	descDSV.Texture2D.MipSlice = 0;
+	descDSV.Flags = 0; 
+
+	//Create depth-stencil view. 
+	hr = DX::g_device->CreateDepthStencilView(m_pZbufferTex, &descDSV, &m_pZbufferView);
+
+	//Bind it to the OM and tell it to compare and sample our rendertargetview. (guess)
+	DX::g_deviceContext->OMSetRenderTargets(1, &m_pRenderTargetView, m_pZbufferView); 
+	
 	return hr; 
 }
+
 
 HRESULT ForwardRenderer::init(HWND* wndHandler)
 {
@@ -99,6 +143,7 @@ HRESULT ForwardRenderer::init(HWND* wndHandler)
 	//Initialize forward renderer 
 	hr = createSwapChain(wndHandler); 
 	createRenderTargetView(); 
+	hr = createZBuffer(); 
 
 	return hr; 
 }

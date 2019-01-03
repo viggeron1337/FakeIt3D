@@ -103,6 +103,16 @@ GameWindow::GameWindow()
 {
 	HRESULT hr;
 	hr = _init(); 
+
+	if (hr != S_OK)
+	{
+		MessageBox(NULL,
+			_T("Direct3D initialization failed!"),
+			_T("FakeIt3D"),
+			NULL);
+
+		exit(0); 
+	}
 }
 
 GameWindow::~GameWindow()
@@ -112,8 +122,11 @@ GameWindow::~GameWindow()
 int GameWindow::start()
 {
 	//Test Object
-	Object triangle; 
-	triangle.Init(); 
+	Object triangle;
+	Object triangleZ; 
+	triangle.Init();
+	triangleZ.tempInitZTriangle(); 
+
 
 	//Handle messages to the window 
 	MSG msg;
@@ -135,6 +148,7 @@ int GameWindow::start()
 		m_frwdRenderer.beginFrame(); 
 		//Render everything
 		triangle.draw(); 
+		triangleZ.draw(); 
 
 		m_frwdRenderer.endFrame(); 
 	}
