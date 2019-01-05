@@ -30,9 +30,14 @@ private:
 
 	HRESULT _initLayoutsAndShaders();
 
+
+
 public:
 
 	HRESULT init(HWND* wndHandler); 
+
+	//This functions flushes out everything to their render queues, in the order of the rendering passes. 
+	void Flush();
 
 	void beginFrame(); 
 	void endFrame(); 

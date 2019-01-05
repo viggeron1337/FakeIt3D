@@ -1,6 +1,7 @@
 #include "GameWindow.h"
 #include <tchar.h>
 #include "Object.h"
+#include <iostream>
 
 ID3D11Device* DX::g_device; 
 ID3D11DeviceContext* DX::g_deviceContext; 
@@ -129,34 +130,64 @@ int GameWindow::start()
 
 
 	//Handle messages to the window 
-	MSG msg;
-	while (true)
+	MSG msg; 
+	msg.message = WM_NULL; 
+
+	//Init loop variables. 
+	m_frames = 0, m_ticks = 0; 
+	m_time = steady_clock::now(); 
+	m_unprocessed = 0; 
+	m_timer = steady_clock::now();
+	m_frequency = 1000000000.0f / 60.0f; 
+
+	while (WM_QUIT != msg.message)
 	{
+		//Get current time. 
+		steady_clock::time_point now = steady_clock::now(); 
+
 		if (PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
 		{
 			TranslateMessage(&msg);
 			DispatchMessageW(&msg);
-
-			if (msg.message == WM_QUIT) break; 
 		}
 
-		//Main Loop//
+		//Get the deltatime since last frame. 
+		auto dt = duration_cast<nanoseconds>(now - m_time).count(); 
+		
+		//Update the last time. 
+		m_time = steady_clock::now(); 
+		
+		m_unprocessed += dt / m_frequency; 
 
-		//Update
 
-		//Render
+		if (m_unprocessed > 1)
+		{
+			m_ticks++; 
+			m_unprocessed -= 1; 
+
+			//Update everything. 
+		}
+		m_frames++; 
+
+
 		m_frwdRenderer.beginFrame(); 
 		
-		//Render everything
-
-		//Adding 2D objects to the queue
+		//Submit to draw queues (temp)
 		triangle.draw(); 
 		triangleZ.draw(); 
-
-		//Draw everything 2D
-		m_frwdRenderer.pass2D();
+		
+		//Render
+		m_frwdRenderer.Flush(); 
 
 		m_frwdRenderer.endFrame(); 
+
+		if (duration_cast<milliseconds>(steady_clock::now() - m_timer).count() > 1000)
+		{
+			std::cout << "FPS: " << m_frames << "TICK: " << m_ticks << std::endl; 
+			m_ticks = 0; 
+			m_frames = 0; 
+			m_timer += milliseconds(1000); 
+		}
 	}
 
 	return (int)msg.wParam;

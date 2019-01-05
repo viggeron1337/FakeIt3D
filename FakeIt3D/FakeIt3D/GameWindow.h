@@ -2,6 +2,10 @@
 #include <Windows.h>
 #include "Extern.h"
 #include "ForwardRenderer.h"
+#include <ctime>
+#include <chrono>
+
+using namespace std::chrono;
 
 class GameWindow
 {
@@ -20,6 +24,13 @@ private:
 
 	int m_test; 
 
+	//Main loop variables
+	steady_clock::time_point m_time;
+	steady_clock::time_point m_timer; 
+	int m_ticks; 
+	int m_frames;
+	float m_frequency; 
+	float m_unprocessed; 
 
 public:
 	GameWindow();

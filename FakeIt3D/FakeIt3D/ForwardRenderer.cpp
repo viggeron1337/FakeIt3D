@@ -197,6 +197,12 @@ HRESULT ForwardRenderer::_initLayoutsAndShaders()
 	return hr;
 }
 
+void ForwardRenderer::Flush()
+{
+	//Draw everything 2D
+	pass2D(); 
+}
+
 HRESULT ForwardRenderer::init(HWND* wndHandler)
 {
 	HRESULT hr; 
