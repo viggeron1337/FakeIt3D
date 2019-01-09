@@ -6,6 +6,23 @@ void Camera::_InitViewMatrix()
 
 Camera::Camera()
 {
+	m_position = XMFLOAT4A(0.0f, 0.0f, -1.0f, 0.0f);
+	m_target = XMFLOAT4A(0.0f, 0.0f, 0.0f, 0.0f); 
+	
+	XMVECTOR Mpos; 
+	Mpos = XMLoadFloat4A(&m_position); 
+	Mpos = XMVectorAdd(Mpos, XMVECTOR{ 0,1,0,0});
+	XMStoreFloat4A(&m_up, Mpos); 
+
+	m_angle = 0.0f; 
+	m_clientWidth = 0.0f; 
+	m_clientHeight = 0.0f; 
+	m_nearPlane = 0.0f; 
+	m_farPlane = 0.0f; 
+
+	XMStoreFloat4x4A(&m_viewMatrix, XMMatrixIdentity()); 
+	XMStoreFloat4x4A(&m_projMatrix, XMMatrixIdentity());
+	XMStoreFloat4x4A(&m_orthoMatrix, XMMatrixIdentity());
 }
 
 Camera::~Camera()
@@ -14,11 +31,16 @@ Camera::~Camera()
 
 Camera::Camera(const Camera & camera)
 {
+	*this = camera; 
 }
 
 Camera & Camera::operator=(const Camera & camera)
 {
-	// TODO: insert return statement here
+	m_position = camera.m_position; 
+	m_target = camera.m_target;  
+	m_up = camera.m_up; 
+
+	//.......
 }
 
 void Camera::InitProjMatrix(const float angle, const float client_width, const float client_height,
@@ -65,17 +87,46 @@ const XMFLOAT4A & Camera::GetTarget() const
 
 const XMFLOAT4A & Camera::GetUp()
 {
-	// TODO: insert return statement here
+	XMVECTOR pos;
+	XMVECTOR up;
+	XMVECTOR Mresult;
+	XMFLOAT4A result;
+
+	pos = XMLoadFloat4A(&m_position);
+	up = XMLoadFloat4A(&m_up);
+
+	Mresult = XMVectorSubtract(up, pos);
+
+	XMStoreFloat4A(&result, Mresult);
+
+	return result;
 }
 
 const XMFLOAT4A Camera::GetLookAt()
 {
-	return XMFLOAT4A();
+	XMVECTOR pos; 
+	XMVECTOR target; 
+	XMVECTOR Mresult; 
+	XMFLOAT4A result; 
+
+	pos = XMLoadFloat4A(&m_position); 
+	target = XMLoadFloat4A(&m_target);
+
+	Mresult = XMVectorSubtract(target, pos); 
+
+	XMStoreFloat4A(&result, Mresult);
+
+	return result; 
 }
 
 const XMFLOAT4X4A Camera::GetViewMatrix()
 {
-	return XMFLOAT4X4A();
+	XMMATRIX view; 
+	view = XMLoadFloat4x4A(&m_viewMatrix); 
+	view = XMMatrixTranspose(view); 
+	XMStoreFloat4x4A(&m_viewMatrix, view);
+
+	return m_viewMatrix; 
 }
 
 void Camera::SetAngle(float angle)
@@ -97,10 +148,20 @@ void Camera::setFarPlane()
 
 const XMFLOAT4X4A Camera::GetProjMatrix()
 {
-	return XMFLOAT4X4A();
+	XMMATRIX proj; 
+	proj = XMLoadFloat4x4A(&m_projMatrix); 
+	proj = XMMatrixTranspose(proj);
+	XMStoreFloat4x4A(&m_projMatrix, proj); 
+	
+	return m_projMatrix; 
 }
 
 const XMFLOAT4X4A Camera::GetOrthoMatrix()
 {
-	return XMFLOAT4X4A();
+	XMMATRIX ortho;
+	ortho = XMLoadFloat4x4A(&m_orthoMatrix);
+	ortho = XMMatrixTranspose(ortho);
+	XMStoreFloat4x4A(&m_orthoMatrix, ortho);
+
+	return m_orthoMatrix;
 }

@@ -20,7 +20,7 @@ public:
 	Camera(); 
 	~Camera(); 
 
-	//Copy constructor lol 
+	//Create camera from other camera (copy constructor). 
 	Camera(const Camera& camera);
 
 	//Operator to make Copy Constructor work properly
@@ -95,6 +95,7 @@ private:
 		float m_nearPlane; 
 		float m_farPlane; 
 		
+		XMFLOAT4X4A m_viewMatrix; 
 		XMFLOAT4X4A m_projMatrix; 
 		XMFLOAT4X4A m_orthoMatrix; 
 }; 

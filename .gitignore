@@ -60,3 +60,5 @@ FakeIt3D/x64/Release/FakeIt3D\.pdb
 *.vcxproj
 
 *.filters
+
+*.obj
