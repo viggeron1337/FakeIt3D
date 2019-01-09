@@ -1,9 +1,5 @@
 #include "Camera.h"
 
-void Camera::_InitViewMatrix()
-{
-}
-
 Camera::Camera()
 {
 	m_position = XMFLOAT4A(0.0f, 0.0f, -1.0f, 0.0f);
@@ -40,13 +36,35 @@ Camera & Camera::operator=(const Camera & camera)
 	m_target = camera.m_target;  
 	m_up = camera.m_up; 
 
-	//.......
+	m_angle = camera.m_angle; 
+	m_clientWidth = camera.m_clientWidth; 
+	m_clientHeight = camera.m_clientHeight; 
+	m_nearPlane = camera.m_nearPlane; 
+	m_farPlane = camera.m_farPlane; 
+
+	m_viewMatrix = camera.m_viewMatrix; 
+	m_projMatrix = camera.m_projMatrix; 
+	m_orthoMatrix = camera.m_orthoMatrix; 
+
+	return *this; 
+}
+
+void Camera::_InitViewMatrix()
+{
+	XMStoreFloat4x4A(&m_viewMatrix, XMMatrixLookAtLH(XMLoadFloat4A(&m_position), XMLoadFloat4A(&m_target),
+		XMLoadFloat4A(&m_up))); 
 }
 
 void Camera::InitProjMatrix(const float angle, const float client_width, const float client_height,
 	const float nearPlane, const float farPlane)
 {
+	m_angle = angle; 
+	m_clientWidth = client_width; 
+	m_clientHeight = client_height; 
+	m_nearPlane = nearPlane; 
+	m_farPlane = farPlane; 
 
+	XMStoreFloat4x4A(&m_projMatrix, XMMatrixPerspectiveFovLH(angle, client_width/client_height, nearPlane, farPlane));
 }
 
 void Camera::InitOrthoMatrix(const float client_width, const float client_height,
@@ -61,10 +79,41 @@ void Camera::onResize(UINT width, UINT height)
 
 void Camera::Move(XMFLOAT4 direction)
 {
+	XMVECTOR Mpos, Mtarget, Mup; 
+
+	Mpos = XMLoadFloat4(&m_position); 
+	Mtarget = XMLoadFloat4(&m_target);
+	Mup = XMLoadFloat4(&m_up);
+
+	Mpos = XMVector4Transform(Mpos, XMMatrixTranslation(direction.x, direction.y, direction.z)); 
+	Mtarget = XMVector4Transform(Mtarget, XMMatrixTranslation(direction.x, direction.y, direction.z));
+	Mup = XMVector4Transform(Mup, XMMatrixTranslation(direction.x, direction.y, direction.z));
+
+	XMStoreFloat4A(&m_position, Mpos); 
+	XMStoreFloat4A(&m_target, Mtarget);
+	XMStoreFloat4A(&m_up, Mup);
+
+	this->_InitViewMatrix(); 
 }
 
 void Camera::Rotate(XMFLOAT4A axis, float degrees)
 {
+
+	XMVECTOR Maxis, Mtarget, Mpos, MlookAtTarget, MlookAtUp, Mup; 
+
+	Maxis = XMLoadFloat4A(&axis); 
+	Mtarget = XMLoadFloat4A(&m_target); 
+	Mpos = XMLoadFloat4A(&m_position); 
+	Mup = XMLoadFloat4A(&m_up); 
+
+	if (XMVector4Equal(Maxis, XMVectorZero()) || degrees == 0.0f)
+		return; 
+
+	//Rotate Vectors
+	MlookAtTarget = XMVectorSubtract(Mtarget, Mpos);
+	MlookAtUp = XMVectorSubtract(Mup, Mpos); 
+
+	//MlookAtTarget = XMVector4Transform(MlookAtTarget)
 }
 
 void Camera::SetPosition(XMFLOAT4A & position)
