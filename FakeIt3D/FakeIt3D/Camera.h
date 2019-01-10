@@ -10,8 +10,16 @@ class Camera
 private:
 
 	//Intiliazie cameras View Matrix based upon m_position, m_target and m_Up.
-	void _InitViewMatrix(); 
+	void _InitViewMatrix();
 
+	ID3D11Buffer* m_CcameraBuffer; 
+
+	struct VS_CONSTANT_BUFFER
+	{
+		XMFLOAT4X4A mvpMatrix; 
+	};
+
+	VS_CONSTANT_BUFFER m_cBufferData; 
 
 public:
 	
@@ -71,10 +79,10 @@ public:
 	const float& GetAngle() const; 
 
 	// Set nearest culling plane distance from view frustum's projection plane
-	void SetNearPlane(); 
+	void SetNearPlane(float nearest); 
 
 	// Set farhest culling plane distance from view frustum's projection plane
-	void setFarPlane(); 
+	void setFarPlane(float farhest); 
 
 	//Returns transposed camera's Projection Matrix
 	const XMFLOAT4X4A GetProjMatrix(); 
