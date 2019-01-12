@@ -151,6 +151,7 @@ HRESULT ForwardRenderer::_createZBuffer()
 
 void ForwardRenderer::_setup2DPass()
 {
+	DX::g_deviceContext->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLESTRIP); 
 	//Set the shaders
 	DX::g_deviceContext->VSSetShader(DX::g_pVertexShader, nullptr, 0);
 	DX::g_deviceContext->PSSetShader(DX::g_pPixelShader, nullptr, 0);
@@ -197,10 +198,10 @@ HRESULT ForwardRenderer::_initLayoutsAndShaders()
 	return hr;
 }
 
-void ForwardRenderer::Flush()
+void ForwardRenderer::Flush(Camera* camera)
 {
 	//Draw everything 2D
-	pass2D(); 
+	pass2D(camera); 
 }
 
 HRESULT ForwardRenderer::init(HWND* wndHandler)
@@ -213,6 +214,10 @@ HRESULT ForwardRenderer::init(HWND* wndHandler)
 	hr = _createZBuffer(); 
 
 	_initLayoutsAndShaders();
+
+	m_tempCam.init(); 
+	/////TEMP//////
+	m_tempCam.InitProjMatrix(45.0f, m_backBufferDesc.Width, m_backBufferDesc.Height, 1.0, 200.0f); 
 
 	return hr; 
 }
@@ -241,7 +246,7 @@ void ForwardRenderer::endFrame()
 	DX::g_swapChain->Present(1, 0); 
 }
 
-void ForwardRenderer::pass2D()
+void ForwardRenderer::pass2D(Camera* camera)
 {
 
 	_setup2DPass(); 
@@ -249,6 +254,21 @@ void ForwardRenderer::pass2D()
 	//Set the stride for the 2D vertices. 
 	UINT stride = sizeof(Vertex); 
 	UINT offset = 0; 
+	
+	//Set active constant buffer and update it if it is dynamic. 
+	camera->updateMatrices(); 
+	ID3D11Buffer* cameraBuffer = camera->getConstantBuffer(); 
+
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
+	ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));
+	//  Disable GPU access to the vertex buffer data.
+	DX::g_deviceContext->Map(camera->getConstantBuffer(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource); 
+	//  Update the vertex buffer here.
+	memcpy(mappedResource.pData, &camera->getCBufferData(), sizeof(XMFLOAT4X4A));
+	//  Reenable GPU access to the vertex buffer data.
+	DX::g_deviceContext->Unmap(camera->getConstantBuffer(), 0);
+
+	DX::g_deviceContext->VSSetConstantBuffers(0, 1, &cameraBuffer); 
 
 	//Set vertex buffer and draw.
 	for (int i = 0; i < RenderQueue::g_Q2DObjects.size(); i++)
@@ -257,8 +277,12 @@ void ForwardRenderer::pass2D()
 		DX::g_deviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &stride ,&offset); 		
 		DX::g_deviceContext->Draw(3,0); 
 	}
+	RenderQueue::g_Q2DObjects.clear(); 
+}
 
-
+Camera & ForwardRenderer::getCam()
+{
+	return m_tempCam; 
 }
 
 ForwardRenderer::ForwardRenderer()

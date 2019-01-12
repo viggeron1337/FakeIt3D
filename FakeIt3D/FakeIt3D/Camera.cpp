@@ -1,28 +1,54 @@
 #include "Camera.h"
 
+void Camera::createConstantBuffer()
+{
+	D3D11_BUFFER_DESC buffDesc; 
+	buffDesc.ByteWidth = sizeof(VS_CONSTANT_BUFFER); 
+	buffDesc.Usage = D3D11_USAGE_DYNAMIC; 
+	buffDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER; 
+	buffDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE; 
+	buffDesc.MiscFlags = 0; 
+	buffDesc.StructureByteStride = 0; 
+
+	D3D11_SUBRESOURCE_DATA pBufferData; 
+	pBufferData.pSysMem = &m_cBufferData;
+	pBufferData.SysMemPitch = 0; 
+	pBufferData.SysMemSlicePitch = 0; 
+
+	DX::g_device->CreateBuffer(&buffDesc, &pBufferData, &m_CcameraBuffer);
+}
+
 Camera::Camera()
 {
-	m_position = XMFLOAT4A(0.0f, 0.0f, -1.0f, 0.0f);
-	m_target = XMFLOAT4A(0.0f, 0.0f, 0.0f, 0.0f); 
-	
-	XMVECTOR Mpos; 
-	Mpos = XMLoadFloat4A(&m_position); 
-	Mpos = XMVectorAdd(Mpos, XMVECTOR{ 0,1,0,0});
-	XMStoreFloat4A(&m_up, Mpos); 
-
-	m_angle = 0.0f; 
-	m_clientWidth = 0.0f; 
-	m_clientHeight = 0.0f; 
-	m_nearPlane = 0.0f; 
-	m_farPlane = 0.0f; 
-
-	XMStoreFloat4x4A(&m_viewMatrix, XMMatrixIdentity()); 
-	XMStoreFloat4x4A(&m_projMatrix, XMMatrixIdentity());
-	XMStoreFloat4x4A(&m_orthoMatrix, XMMatrixIdentity());
 }
 
 Camera::~Camera()
 {
+}
+
+void Camera::init()
+{
+	m_position = XMFLOAT4A(0.0f, 0.0f, -2.0f, 0.0f);
+	m_target = XMFLOAT4A(0.0f, 0.0f, 0.0f, 0.0f);
+
+	XMVECTOR Mpos;
+	Mpos = XMLoadFloat4A(&m_position);
+	Mpos = XMVectorAdd(Mpos, XMVECTOR{ 0,1,0,0 });
+	XMStoreFloat4A(&m_up, Mpos);
+
+	m_angle = 0.0f;
+	m_clientWidth = 0.0f;
+	m_clientHeight = 0.0f;
+	m_nearPlane = 0.0f;
+	m_farPlane = 0.0f;
+
+	XMStoreFloat4x4A(&m_viewMatrix, XMMatrixIdentity());
+	XMStoreFloat4x4A(&m_projMatrix, XMMatrixIdentity());
+	XMStoreFloat4x4A(&m_orthoMatrix, XMMatrixIdentity());
+
+	createConstantBuffer();
+
+	_InitViewMatrix();
 }
 
 Camera::Camera(const Camera & camera)
@@ -53,13 +79,6 @@ void Camera::_InitViewMatrix()
 {
 	XMStoreFloat4x4A(&m_viewMatrix, XMMatrixLookAtLH(XMLoadFloat4A(&m_position), XMLoadFloat4A(&m_target),
 		XMLoadFloat4A(&m_up))); 
-
-	//Update so that shaders work with the correct data
-	XMMATRIX view = XMLoadFloat4x4A(&m_viewMatrix);
-	XMMATRIX proj = XMLoadFloat4x4A(&m_projMatrix);
-	XMMATRIX wvp = XMLoadFloat4x4A(&m_cBufferData.mvpMatrix);
-
-	wvp = XMMatrixIdentity() * view * proj;
 }
 
 void Camera::InitProjMatrix(const float angle, const float client_width, const float client_height,
@@ -71,16 +90,7 @@ void Camera::InitProjMatrix(const float angle, const float client_width, const f
 	m_nearPlane = nearPlane; 
 	m_farPlane = farPlane; 
 
-	XMStoreFloat4x4A(&m_projMatrix, XMMatrixPerspectiveFovLH(angle, client_width/client_height, nearPlane, farPlane));
-
-	//Update so that shaders work with the correct data
-	XMMATRIX view = XMLoadFloat4x4A(&m_viewMatrix); 
-	XMMATRIX proj = XMLoadFloat4x4A(&m_projMatrix); 
-	XMMATRIX wvp = XMLoadFloat4x4A(&m_cBufferData.mvpMatrix); 
-
-	wvp = XMMatrixIdentity() * view * proj; 
-
-	XMStoreFloat4x4A(&m_cBufferData.mvpMatrix, wvp); 
+	XMStoreFloat4x4A(&m_projMatrix, XMMatrixPerspectiveFovLH(XMConvertToRadians(angle), client_width/client_height, nearPlane, farPlane));
 }
 
 void Camera::InitOrthoMatrix(const float client_width, const float client_height,
@@ -91,7 +101,6 @@ void Camera::InitOrthoMatrix(const float client_width, const float client_height
 	m_nearPlane = nearPlane;
 	m_farPlane = farPlane;
 
-	
 	XMStoreFloat4x4(&m_orthoMatrix, XMMatrixOrthographicLH(client_width, client_height, nearPlane, farPlane));
 }
 
@@ -119,7 +128,7 @@ void Camera::Move(XMFLOAT4 direction)
 	XMStoreFloat4A(&m_target, Mtarget);
 	XMStoreFloat4A(&m_up, Mup);
 
-	this->_InitViewMatrix(); 
+	_InitViewMatrix(); 
 }
 
 void Camera::Rotate(XMFLOAT4A axis, float degrees)
@@ -298,4 +307,26 @@ const XMFLOAT4X4A Camera::GetOrthoMatrix()
 	XMStoreFloat4x4A(&m_orthoMatrix, ortho);
 
 	return m_orthoMatrix;
+}
+
+const Camera::VS_CONSTANT_BUFFER& Camera::getCBufferData() const
+{
+	return m_cBufferData; 
+}
+
+ID3D11Buffer * Camera::getConstantBuffer()
+{
+	return m_CcameraBuffer; 
+}
+
+void Camera::updateMatrices()
+{
+	//Update so that shaders work with the correct data
+	XMMATRIX view = XMLoadFloat4x4A(&m_viewMatrix);
+	XMMATRIX proj = XMLoadFloat4x4A(&m_projMatrix);
+	XMMATRIX wvp = XMLoadFloat4x4A(&m_cBufferData.mvpMatrix);
+
+	wvp = XMMatrixIdentity() * view * proj;
+
+	XMStoreFloat4x4A(&m_cBufferData.mvpMatrix, wvp);
 }

@@ -177,13 +177,13 @@ int GameWindow::start()
 		triangleZ.draw(); 
 		
 		//Render
-		m_frwdRenderer.Flush(); 
+		m_frwdRenderer.Flush(&m_frwdRenderer.getCam()); 
 
 		m_frwdRenderer.endFrame(); 
 
 		if (duration_cast<milliseconds>(steady_clock::now() - m_timer).count() > 1000)
 		{
-			std::cout << "FPS: " << m_frames << "TICK: " << m_ticks << std::endl; 
+			std::cout << m_frwdRenderer.getCam().GetPosition().y << std::endl; 
 			m_ticks = 0; 
 			m_frames = 0; 
 			m_timer += milliseconds(1000); 

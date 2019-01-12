@@ -2,6 +2,7 @@
 #include <d3d11.h>
 #include "Object.h"
 #include <vector>
+#include "Camera.h"
 
 class ForwardRenderer
 {
@@ -30,6 +31,7 @@ private:
 
 	HRESULT _initLayoutsAndShaders();
 
+	Camera m_tempCam; 
 
 
 public:
@@ -37,12 +39,14 @@ public:
 	HRESULT init(HWND* wndHandler); 
 
 	//This functions flushes out everything to their render queues, in the order of the rendering passes. 
-	void Flush();
+	void Flush(Camera* camera);
 
 	void beginFrame(); 
 	void endFrame(); 
 
-	void pass2D(); 
+	void pass2D(Camera* camera); 
+
+	Camera& getCam(); 
 
 	ForwardRenderer(); 
 	~ForwardRenderer(); 

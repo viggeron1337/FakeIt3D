@@ -1,4 +1,8 @@
 
+cbuffer VS_CONSTANT_BUFFER : register(b0)
+{
+	matrix wvpMatrix; 
+}
 
 struct Input
 {
@@ -21,7 +25,7 @@ Output main(Input input)
 	//For correct calculations
 	input.position.w = 1; 
 	
-	output.position = input.position; 
+	output.position = mul(input.position,wvpMatrix); 
 	output.color = input.color; 
 
 	return output; 

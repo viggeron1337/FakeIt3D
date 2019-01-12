@@ -68,12 +68,12 @@ HRESULT Object::tempInitZTriangle()
 	Vertex m_vertexBufferData[3] =
 	{
 		//Defining vetices of a triangle
-		DirectX::XMFLOAT4A(-2.0f,-1.0f,1.0f, 0.0f),
+		DirectX::XMFLOAT4A(-1.0f,-1.0f,1.0f, 0.0f),
 		DirectX::XMFLOAT4A(1.0, 0.0, 0.0, 1.0f),
-		DirectX::XMFLOAT4A(-1.0f,1.0f,1.0f, 0.0f),
-		DirectX::XMFLOAT4A(0.0, 1.0, 0.0, 1.0f),
-		DirectX::XMFLOAT4A(0.0f,-1.0f,1.0f, 0.0f),
-		DirectX::XMFLOAT4A(0.0, 0.0, 1.0, 1.0f),
+		DirectX::XMFLOAT4A(0.0f,1.0f,1.0f, 0.0f),
+		DirectX::XMFLOAT4A(1.0, 0.0, 0.0, 1.0f),
+		DirectX::XMFLOAT4A(1.0f,-1.0f,1.0f, 0.0f),
+		DirectX::XMFLOAT4A(1.0, 0.0, 0.0, 1.0f),
 	};
 
 	HRESULT hr;

@@ -1,12 +1,20 @@
 #pragma once
 #include <d3d11.h>
 #include <DirectXMath.h>
+#include "Extern.h"
 
 using namespace DirectX; 
 
 
 class Camera 
 {
+
+public:
+	struct VS_CONSTANT_BUFFER
+	{
+		XMFLOAT4X4A mvpMatrix;
+	};
+
 private:
 
 	//Intiliazie cameras View Matrix based upon m_position, m_target and m_Up.
@@ -14,12 +22,8 @@ private:
 
 	ID3D11Buffer* m_CcameraBuffer; 
 
-	struct VS_CONSTANT_BUFFER
-	{
-		XMFLOAT4X4A mvpMatrix; 
-	};
-
 	VS_CONSTANT_BUFFER m_cBufferData; 
+	void createConstantBuffer(); 
 
 public:
 	
@@ -27,6 +31,8 @@ public:
 	//with up-vector {0,1,0} (m_up is not a vector, but a point). 
 	Camera(); 
 	~Camera(); 
+
+	void init(); 
 
 	//Create camera from other camera (copy constructor). 
 	Camera(const Camera& camera);
@@ -39,8 +45,8 @@ public:
 
 	//If sometime needed.
 	void InitOrthoMatrix(const float client_width, const float client_height, 
-		const float nearPlane, const float farPlane); 
-
+	const float nearPlane, const float farPlane); 
+	
 	void onResize(UINT width, UINT height); 
 
 	//////////////////////////////////////////////////////////////////////////////
@@ -106,4 +112,10 @@ private:
 		XMFLOAT4X4A m_viewMatrix; 
 		XMFLOAT4X4A m_projMatrix; 
 		XMFLOAT4X4A m_orthoMatrix; 
+
+public:
+	const VS_CONSTANT_BUFFER& getCBufferData() const; 
+	ID3D11Buffer* getConstantBuffer(); 
+
+	void updateMatrices(); 
 }; 
