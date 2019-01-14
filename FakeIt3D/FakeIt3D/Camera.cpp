@@ -328,5 +328,5 @@ void Camera::updateMatrices()
 
 	wvp = XMMatrixIdentity() * view * proj;
 
-	XMStoreFloat4x4A(&m_cBufferData.mvpMatrix, wvp);
+	XMStoreFloat4x4A(&m_cBufferData.mvpMatrix, XMMatrixTranspose(wvp));
 }

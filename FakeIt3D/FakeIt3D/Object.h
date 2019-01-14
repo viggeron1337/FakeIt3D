@@ -16,16 +16,35 @@ private:
 
 	struct CONSTANT_BUFFER
 	{
-		DirectX::XMFLOAT4X4A m_worldMatrix; 
+		DirectX::XMFLOAT4X4A world; 
 	};
 
 	ID3D11Buffer* m_pVertexBuffer = nullptr;
+	ID3D11Buffer* m_constantBufferPtr; 
 	HRESULT createMesh(); 
+
+	DirectX::XMFLOAT4A m_position; 
+
+	DirectX::XMMATRIX m_transMatrix; 
+
+	CONSTANT_BUFFER m_constantBufferData; 
+
+	void createConstantBuffer(); 
 
 public:
 	Object(); 
 	~Object(); 
 
+	void setPosition(float x, float y, float z); 
+	DirectX::XMFLOAT4A& getPosition(); 
+
+	void Move(float x, float y, float z); 
+
+	void updateMatrices(); 
+
+	CONSTANT_BUFFER& getBufferData(); 
+
+	ID3D11Buffer* getConstantBufferPtr(); 
 
 	HRESULT Init();
 	HRESULT tempInitZTriangle();

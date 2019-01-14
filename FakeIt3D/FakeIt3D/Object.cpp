@@ -37,7 +37,27 @@ HRESULT Object::createMesh()
 	// Create the vertex buffer.
 	hr = DX::g_device->CreateBuffer(&bufferDesc, &InitData, &m_pVertexBuffer);
 
+	createConstantBuffer(); 
+
 	return hr; 
+}
+
+void Object::createConstantBuffer()
+{
+	D3D11_BUFFER_DESC buffDesc;
+	buffDesc.ByteWidth = sizeof(CONSTANT_BUFFER);
+	buffDesc.Usage = D3D11_USAGE_DYNAMIC;
+	buffDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+	buffDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+	buffDesc.MiscFlags = 0;
+	buffDesc.StructureByteStride = 0;
+
+	D3D11_SUBRESOURCE_DATA pBufferData;
+	pBufferData.pSysMem = &m_constantBufferData;
+	pBufferData.SysMemPitch = 0;
+	pBufferData.SysMemSlicePitch = 0;
+
+	DX::g_device->CreateBuffer(&buffDesc, &pBufferData, &m_constantBufferPtr);
 }
 
 Object::Object()
@@ -47,6 +67,36 @@ Object::Object()
 Object::~Object()
 {
 	m_pVertexBuffer->Release(); 
+}
+
+void Object::setPosition(float x, float y, float z)
+{
+	
+}
+
+DirectX::XMFLOAT4A & Object::getPosition()
+{
+	return m_position; 
+}
+
+void Object::Move(float x, float y, float z)
+{
+	m_transMatrix = DirectX::XMMatrixTranspose(DirectX::XMMatrixTranslation(x, y, z)); 
+}
+
+void Object::updateMatrices()
+{
+	DirectX::XMStoreFloat4x4A(&m_constantBufferData.world, m_transMatrix); 
+}
+
+Object::CONSTANT_BUFFER & Object::getBufferData()
+{
+	return m_constantBufferData; 
+}
+
+ID3D11Buffer * Object::getConstantBufferPtr()
+{
+	return m_constantBufferPtr; 
 }
 
 ID3D11Buffer * Object::getBufferPtr()
@@ -93,6 +143,9 @@ HRESULT Object::tempInitZTriangle()
 
 	// Create the vertex buffer.
 	hr = DX::g_device->CreateBuffer(&bufferDesc, &InitData, &m_pVertexBuffer);
+
+	//Init translation matrix. 
+	m_transMatrix = DirectX::XMMatrixTranslation(0.f, 0.f, 0.f);
 
 	return hr; 
 }

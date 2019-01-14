@@ -139,6 +139,10 @@ int GameWindow::start()
 	m_unprocessed = 0; 
 	m_timer = steady_clock::now();
 	m_frequency = 1000000000.0f / 60.0f; 
+	
+	//TEMP
+	float move = 0.f;
+	//
 
 	while (WM_QUIT != msg.message)
 	{
@@ -164,8 +168,25 @@ int GameWindow::start()
 		{
 			m_ticks++; 
 			m_unprocessed -= 1; 
-
+			////////////////////////////////////TEMP///////////////////////////////////////////////
 			//Update everything. 
+			move += 0.001f; 
+			triangle.Move(move, 0, 0);  
+			triangle.updateMatrices(); 
+
+			D3D11_MAPPED_SUBRESOURCE mappedResource;
+			ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));
+			//  Disable GPU access to the vertex buffer data.
+			DX::g_deviceContext->Map(triangle.getConstantBufferPtr(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
+			//  Update the vertex buffer here.
+			memcpy(mappedResource.pData, &triangle.getBufferData(), sizeof(XMFLOAT4X4A));
+			//  Reenable GPU access to the vertex buffer data.
+			DX::g_deviceContext->Unmap(triangle.getConstantBufferPtr(), 0);
+
+			ID3D11Buffer* buffer = triangle.getConstantBufferPtr();
+			DX::g_deviceContext->VSSetConstantBuffers(1, 1, &buffer); 
+			////////////////////////////////////////////////////////////////////////////////////////
+
 		}
 		m_frames++; 
 
@@ -183,7 +204,7 @@ int GameWindow::start()
 
 		if (duration_cast<milliseconds>(steady_clock::now() - m_timer).count() > 1000)
 		{
-			std::cout << m_frwdRenderer.getCam().GetPosition().y << std::endl; 
+			std::cout << m_frames << std::endl; 
 			m_ticks = 0; 
 			m_frames = 0; 
 			m_timer += milliseconds(1000); 
