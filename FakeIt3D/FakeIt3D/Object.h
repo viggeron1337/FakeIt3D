@@ -25,7 +25,7 @@ private:
 
 	DirectX::XMFLOAT4A m_position; 
 
-	DirectX::XMMATRIX m_transMatrix; 
+	DirectX::XMMATRIX m_worldMatrix; 
 
 	CONSTANT_BUFFER m_constantBufferData; 
 
@@ -39,8 +39,6 @@ public:
 	DirectX::XMFLOAT4A& getPosition(); 
 
 	void Move(float x, float y, float z); 
-
-	void updateMatrices(); 
 
 	CONSTANT_BUFFER& getBufferData(); 
 

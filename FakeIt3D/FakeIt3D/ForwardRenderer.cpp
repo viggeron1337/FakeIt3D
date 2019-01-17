@@ -198,6 +198,11 @@ HRESULT ForwardRenderer::_initLayoutsAndShaders()
 	return hr;
 }
 
+void ForwardRenderer::_WorldViewProjection(Object * obj)
+{
+	m_tempCam.setCurrentWVP(obj); 
+}
+
 void ForwardRenderer::Flush(Camera* camera)
 {
 	//Draw everything 2D
@@ -255,26 +260,30 @@ void ForwardRenderer::pass2D(Camera* camera)
 	UINT stride = sizeof(Vertex); 
 	UINT offset = 0; 
 	
-	//Set active constant buffer and update it if it is dynamic. 
-	camera->updateMatrices(); 
-	ID3D11Buffer* cameraBuffer = camera->getConstantBuffer(); 
-
-	D3D11_MAPPED_SUBRESOURCE mappedResource;
-	ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));
-	//  Disable GPU access to the vertex buffer data.
-	DX::g_deviceContext->Map(camera->getConstantBuffer(), 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource); 
-	//  Update the vertex buffer here.
-	memcpy(mappedResource.pData, &camera->getCBufferData(), sizeof(XMFLOAT4X4A));
-	//  Reenable GPU access to the vertex buffer data.
-	DX::g_deviceContext->Unmap(camera->getConstantBuffer(), 0);
-
-	DX::g_deviceContext->VSSetConstantBuffers(0, 1, &cameraBuffer); 
-
-	//Set vertex buffer and draw.
 	for (int i = 0; i < RenderQueue::g_Q2DObjects.size(); i++)
 	{
+		//Set vertex buffer for current object
 		ID3D11Buffer* vertexBuffer = RenderQueue::g_Q2DObjects[i]->getBufferPtr();
-		DX::g_deviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &stride ,&offset); 		
+		DX::g_deviceContext->IASetVertexBuffers(0, 1, &vertexBuffer, &stride ,&offset); 	
+
+		//Create coresponding wvp-matrix
+		_WorldViewProjection(RenderQueue::g_Q2DObjects[i]);
+
+		ID3D11Buffer* cameraBuffer = camera->getConstantBuffer(); 
+		D3D11_MAPPED_SUBRESOURCE mappedResource;
+		ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));
+		//  Disable GPU access to the constant buffer data.
+		DX::g_deviceContext->Map(cameraBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource); 
+	
+		//Copy to the buffer on the GPU.
+		memcpy(mappedResource.pData, &camera->getCBufferData(), sizeof(XMFLOAT4X4A));
+
+		// Reenable GPU access to the vertex buffer data.
+		DX::g_deviceContext->Unmap(camera->getConstantBuffer(), 0);
+	
+		//Set the constant buffer and draw.
+		DX::g_deviceContext->VSSetConstantBuffers(0, 1, &cameraBuffer); 
+	 
 		DX::g_deviceContext->Draw(3,0); 
 	}
 	RenderQueue::g_Q2DObjects.clear(); 

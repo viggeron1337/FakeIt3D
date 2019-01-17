@@ -2,6 +2,7 @@
 #include <d3d11.h>
 #include <DirectXMath.h>
 #include "Extern.h"
+#include "Object.h"
 
 using namespace DirectX; 
 
@@ -12,7 +13,7 @@ class Camera
 public:
 	struct VS_CONSTANT_BUFFER
 	{
-		XMFLOAT4X4A mvpMatrix;
+		XMFLOAT4X4A wvpMatrix;
 	};
 
 private:
@@ -90,6 +91,9 @@ public:
 	// Set farhest culling plane distance from view frustum's projection plane
 	void setFarPlane(float farhest); 
 
+	//Set current wvp when needed. 
+	void setCurrentWVP(Object* obj); 
+
 	//Returns transposed camera's Projection Matrix
 	const XMFLOAT4X4A GetProjMatrix(); 
 
@@ -117,5 +121,5 @@ public:
 	const VS_CONSTANT_BUFFER& getCBufferData() const; 
 	ID3D11Buffer* getConstantBuffer(); 
 
-	void updateMatrices(); 
+	void updateMatrices();
 }; 

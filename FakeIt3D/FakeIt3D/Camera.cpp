@@ -77,7 +77,8 @@ Camera & Camera::operator=(const Camera & camera)
 
 void Camera::_InitViewMatrix()
 {
-	XMStoreFloat4x4A(&m_viewMatrix, XMMatrixLookAtLH(XMLoadFloat4A(&m_position), XMLoadFloat4A(&m_target),
+	//NOTE: WHEN CAMERA CAN MOVE, TRY TRANSPOSING HERE INSTEAD OF IN updateMatrices()
+	XMStoreFloat4x4A(&m_viewMatrix,XMMatrixLookAtLH(XMLoadFloat4A(&m_position), XMLoadFloat4A(&m_target),
 		XMLoadFloat4A(&m_up))); 
 }
 
@@ -90,7 +91,7 @@ void Camera::InitProjMatrix(const float angle, const float client_width, const f
 	m_nearPlane = nearPlane; 
 	m_farPlane = farPlane; 
 
-	XMStoreFloat4x4A(&m_projMatrix, XMMatrixPerspectiveFovLH(XMConvertToRadians(angle), client_width/client_height, nearPlane, farPlane));
+	XMStoreFloat4x4A(&m_projMatrix,XMMatrixPerspectiveFovLH(XMConvertToRadians(angle), client_width/client_height, nearPlane, farPlane));
 }
 
 void Camera::InitOrthoMatrix(const float client_width, const float client_height,
@@ -101,7 +102,7 @@ void Camera::InitOrthoMatrix(const float client_width, const float client_height
 	m_nearPlane = nearPlane;
 	m_farPlane = farPlane;
 
-	XMStoreFloat4x4(&m_orthoMatrix, XMMatrixOrthographicLH(client_width, client_height, nearPlane, farPlane));
+	XMStoreFloat4x4(&m_orthoMatrix, XMMatrixTranspose(XMMatrixOrthographicLH(client_width, client_height, nearPlane, farPlane)));
 }
 
 void Camera::onResize(UINT width, UINT height)
@@ -259,12 +260,12 @@ const XMFLOAT4A Camera::GetLookAt()
 const XMFLOAT4X4A Camera::GetViewMatrix()
 {
 	XMMATRIX view; 
-	view = XMLoadFloat4x4A(&m_viewMatrix); 
-	view = XMMatrixTranspose(view); 
+	view = XMLoadFloat4x4A(&m_viewMatrix);  
 	XMStoreFloat4x4A(&m_viewMatrix, view);
 
 	return m_viewMatrix; 
 }
+
 
 void Camera::SetAngle(float angle)
 {
@@ -289,11 +290,21 @@ void Camera::setFarPlane(float farhest)
 	onResize(m_clientWidth, m_clientHeight);
 }
 
+void Camera::setCurrentWVP(Object* obj)
+{
+	XMMATRIX objWorld = XMLoadFloat4x4A(&obj->getBufferData().world); 
+	XMMATRIX viewProjection = XMLoadFloat4x4A(&m_cBufferData.wvpMatrix); 
+
+	//World, View and Projection are transposed when needed, don't do it here since this is 
+	//called every frame. Tranposing the projection every frame, even though it has not been changed,
+	//can cause flickering geometry; And we don't do that here. 
+	XMStoreFloat4x4A(&m_cBufferData.wvpMatrix,objWorld * viewProjection);
+}
+
 const XMFLOAT4X4A Camera::GetProjMatrix()
 {
 	XMMATRIX proj; 
 	proj = XMLoadFloat4x4A(&m_projMatrix); 
-	proj = XMMatrixTranspose(proj);
 	XMStoreFloat4x4A(&m_projMatrix, proj); 
 	
 	return m_projMatrix; 
@@ -303,7 +314,6 @@ const XMFLOAT4X4A Camera::GetOrthoMatrix()
 {
 	XMMATRIX ortho;
 	ortho = XMLoadFloat4x4A(&m_orthoMatrix);
-	ortho = XMMatrixTranspose(ortho);
 	XMStoreFloat4x4A(&m_orthoMatrix, ortho);
 
 	return m_orthoMatrix;
@@ -323,10 +333,13 @@ void Camera::updateMatrices()
 {
 	//Update so that shaders work with the correct data
 	XMMATRIX view = XMLoadFloat4x4A(&m_viewMatrix);
-	XMMATRIX proj = XMLoadFloat4x4A(&m_projMatrix);
-	XMMATRIX wvp = XMLoadFloat4x4A(&m_cBufferData.mvpMatrix);
+	XMMATRIX proj = XMLoadFloat4x4A(&m_projMatrix);  
 
-	wvp = XMMatrixIdentity() * view * proj;
+	//The camera view proj is yet to be multiplied with an objects world. 
+	XMMATRIX viewProjection; 
 
-	XMStoreFloat4x4A(&m_cBufferData.mvpMatrix, XMMatrixTranspose(wvp));
+	//View needs to be tranposed every frame, but doing so with projection will cause flickering geometry. 
+	viewProjection = view * proj;
+
+	XMStoreFloat4x4A(&m_cBufferData.wvpMatrix, viewProjection);
 }

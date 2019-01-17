@@ -33,6 +33,7 @@ private:
 
 	Camera m_tempCam; 
 
+	void _WorldViewProjection(Object* obj); 
 
 public:
 

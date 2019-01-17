@@ -1,12 +1,7 @@
 
 cbuffer VS_CONSTANT_BUFFER : register(b0)
 {
-	matrix wvpMatrix; 
-}
-
-cbuffer CONSTANT_BUFFER : register(b1)
-{
-	matrix transMatrix; 
+	matrix wvpMatrix;
 }
 
 struct Input
@@ -27,14 +22,10 @@ Output main(Input input)
 {
 	Output output; 
 
-	matrix test; 
 	//For correct calculations
 	input.position.w = 1; 
-	
-	test = mul(transMatrix, wvpMatrix); 
 
-	output.position = mul(input.position, test); 
-	//output.position = mul(input.position,wvpMatrix); 
+	output.position = mul(input.position,wvpMatrix); 
 	output.color = input.color; 
 
 	return output; 

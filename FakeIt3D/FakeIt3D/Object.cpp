@@ -81,12 +81,10 @@ DirectX::XMFLOAT4A & Object::getPosition()
 
 void Object::Move(float x, float y, float z)
 {
-	m_transMatrix = DirectX::XMMatrixTranspose(DirectX::XMMatrixTranslation(x, y, z)); 
-}
+	m_worldMatrix = DirectX::XMMatrixTranslation(x, y, z); 
 
-void Object::updateMatrices()
-{
-	DirectX::XMStoreFloat4x4A(&m_constantBufferData.world, m_transMatrix); 
+	//Make sure to save the movement in the buffer. 
+	DirectX::XMStoreFloat4x4A(&m_constantBufferData.world, XMMatrixTranspose(m_worldMatrix));
 }
 
 Object::CONSTANT_BUFFER & Object::getBufferData()
@@ -145,7 +143,7 @@ HRESULT Object::tempInitZTriangle()
 	hr = DX::g_device->CreateBuffer(&bufferDesc, &InitData, &m_pVertexBuffer);
 
 	//Init translation matrix. 
-	m_transMatrix = DirectX::XMMatrixTranslation(0.f, 0.f, 0.f);
+	m_worldMatrix = DirectX::XMMatrixTranslation(0.f, 0.f, 0.f);
 
 	return hr; 
 }
