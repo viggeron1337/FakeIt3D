@@ -171,10 +171,7 @@ int GameWindow::start()
 			////////////////////////////////////TEMP///////////////////////////////////////////////
 			//Update everything. 
 			move += 0.001f; 
-			triangle.Move(move, 0, 0);  
-			
-			//Update view projection, only done once per frame
-			m_frwdRenderer.getCam().updateMatrices(); 
+			triangle.Move(move, 0, 0); 
 		}
 		m_frames++; 
 
@@ -183,7 +180,7 @@ int GameWindow::start()
 		
 		//Submit to draw queues (temp)
 		triangle.draw(); 
-		triangleZ.draw(); 
+		//triangleZ.draw(); 
 		
 		//Render
 		m_frwdRenderer.Flush(&m_frwdRenderer.getCam()); 

@@ -222,7 +222,7 @@ HRESULT ForwardRenderer::init(HWND* wndHandler)
 
 	m_tempCam.init(); 
 	/////TEMP//////
-	m_tempCam.InitProjMatrix(45.0f, m_backBufferDesc.Width, m_backBufferDesc.Height, 1.0, 200.0f); 
+	m_tempCam.InitProjMatrix(90.0f, m_backBufferDesc.Width, m_backBufferDesc.Height, 1.0, 200.0f); 
 
 	return hr; 
 }
@@ -274,7 +274,7 @@ void ForwardRenderer::pass2D(Camera* camera)
 		ZeroMemory(&mappedResource, sizeof(D3D11_MAPPED_SUBRESOURCE));
 		//  Disable GPU access to the constant buffer data.
 		DX::g_deviceContext->Map(cameraBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource); 
-	
+		
 		//Copy to the buffer on the GPU.
 		memcpy(mappedResource.pData, &camera->getCBufferData(), sizeof(XMFLOAT4X4A));
 

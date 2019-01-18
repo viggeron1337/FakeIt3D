@@ -84,7 +84,7 @@ void Object::Move(float x, float y, float z)
 	m_worldMatrix = DirectX::XMMatrixTranslation(x, y, z); 
 
 	//Make sure to save the movement in the buffer. 
-	DirectX::XMStoreFloat4x4A(&m_constantBufferData.world, XMMatrixTranspose(m_worldMatrix));
+	DirectX::XMStoreFloat4x4A(&m_constantBufferData.world, m_worldMatrix);
 }
 
 Object::CONSTANT_BUFFER & Object::getBufferData()
@@ -116,11 +116,11 @@ HRESULT Object::tempInitZTriangle()
 	Vertex m_vertexBufferData[3] =
 	{
 		//Defining vetices of a triangle
-		DirectX::XMFLOAT4A(-1.0f,-1.0f,1.0f, 0.0f),
+		DirectX::XMFLOAT4A(-1.0f,-1.0f,-1.0f, 0.0f),
 		DirectX::XMFLOAT4A(1.0, 0.0, 0.0, 1.0f),
-		DirectX::XMFLOAT4A(0.0f,1.0f,1.0f, 0.0f),
+		DirectX::XMFLOAT4A(0.0f,1.0f,-1.0f, 0.0f),
 		DirectX::XMFLOAT4A(1.0, 0.0, 0.0, 1.0f),
-		DirectX::XMFLOAT4A(1.0f,-1.0f,1.0f, 0.0f),
+		DirectX::XMFLOAT4A(1.0f,-1.0f,-1.0f, 0.0f),
 		DirectX::XMFLOAT4A(1.0, 0.0, 0.0, 1.0f),
 	};
 

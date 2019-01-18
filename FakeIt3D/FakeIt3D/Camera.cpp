@@ -77,9 +77,8 @@ Camera & Camera::operator=(const Camera & camera)
 
 void Camera::_InitViewMatrix()
 {
-	//NOTE: WHEN CAMERA CAN MOVE, TRY TRANSPOSING HERE INSTEAD OF IN updateMatrices()
-	XMStoreFloat4x4A(&m_viewMatrix,XMMatrixLookAtLH(XMLoadFloat4A(&m_position), XMLoadFloat4A(&m_target),
-		XMLoadFloat4A(&m_up))); 
+	XMStoreFloat4x4A(&m_viewMatrix, XMMatrixTranspose(XMMatrixLookAtLH(XMLoadFloat4A(&m_position), XMLoadFloat4A(&m_target),
+		XMLoadFloat4A(&m_up)))); 
 }
 
 void Camera::InitProjMatrix(const float angle, const float client_width, const float client_height,
@@ -91,7 +90,7 @@ void Camera::InitProjMatrix(const float angle, const float client_width, const f
 	m_nearPlane = nearPlane; 
 	m_farPlane = farPlane; 
 
-	XMStoreFloat4x4A(&m_projMatrix,XMMatrixPerspectiveFovLH(XMConvertToRadians(angle), client_width/client_height, nearPlane, farPlane));
+	XMStoreFloat4x4A(&m_projMatrix, XMMatrixTranspose(XMMatrixPerspectiveFovLH(XMConvertToRadians(angle), client_width/client_height, nearPlane, farPlane)));
 }
 
 void Camera::InitOrthoMatrix(const float client_width, const float client_height,
@@ -292,13 +291,16 @@ void Camera::setFarPlane(float farhest)
 
 void Camera::setCurrentWVP(Object* obj)
 {
+	XMMATRIX view = XMLoadFloat4x4A(&m_viewMatrix);
+	XMMATRIX projection = XMLoadFloat4x4A(&m_projMatrix);
+
 	XMMATRIX objWorld = XMLoadFloat4x4A(&obj->getBufferData().world); 
-	XMMATRIX viewProjection = XMLoadFloat4x4A(&m_cBufferData.wvpMatrix); 
+	XMMATRIX viewProjection = projection * view; 
 
 	//World, View and Projection are transposed when needed, don't do it here since this is 
 	//called every frame. Tranposing the projection every frame, even though it has not been changed,
 	//can cause flickering geometry; And we don't do that here. 
-	XMStoreFloat4x4A(&m_cBufferData.wvpMatrix,objWorld * viewProjection);
+	XMStoreFloat4x4A(&m_cBufferData.wvpMatrix,XMMatrixTranspose(viewProjection * objWorld));
 }
 
 const XMFLOAT4X4A Camera::GetProjMatrix()
@@ -339,7 +341,7 @@ void Camera::updateMatrices()
 	XMMATRIX viewProjection; 
 
 	//View needs to be tranposed every frame, but doing so with projection will cause flickering geometry. 
-	viewProjection = view * proj;
+	viewProjection = proj * view;
 
 	XMStoreFloat4x4A(&m_cBufferData.wvpMatrix, viewProjection);
 }
